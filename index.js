@@ -10,9 +10,8 @@ app.get("/", (req, res) => {
     res.status(200).send("This is my API");
 });
 
-const { authRouters, userRouters, blogRouters } = require("./routers");
+const { authRouters, blogRouters } = require("./routers");
 app.use("/auth", authRouters);
-app.use("/user", userRouters);
 app.use("/blog", blogRouters);
 
 app.listen(PORT, () => {
