@@ -25,7 +25,6 @@ module.exports = {
             console.log(token);
 
             res.status(200).send({
-                status: true,
                 message: "Register success",
                 token,
                 result
@@ -38,7 +37,6 @@ module.exports = {
     login: async (req, res) => {
         try {
             const { data, password } = req.body;
-
             const checkLogin = await user.findOne({
                 where: {
                     [Op.or]: [
@@ -85,9 +83,7 @@ module.exports = {
                     where: { username: req.user.username },
                 }
             );
-            res.status(200).send({
-                message: "Verivy Success"
-            })
+            res.status(200).send({ message: "Verivy Success" });
         } catch (error) {
             res.status(400).send(error);
         }
@@ -98,19 +94,22 @@ module.exports = {
             const isAccountExist = await user.findOne({
                 where: { id: req.user.id },
             });
+
             const email = isAccountExist.email;
-            console.log(isAccountExist.username);
             if (!isAccountExist.isVerified) throw { msg: "Account not verified" };
             if (currentUsername !== isAccountExist.username)
                 throw { message: "Username not found" };
+
             const result = await user.update(
                 { username: newUsername },
                 { where: { id: req.user.id } }
             );
+
             const data = await fs.readFileSync(
                 "./index.html",
                 "utf-8"
             );
+
             const tempCompile = await handlebars.compile(data);
             const tempResult = tempCompile({ username: newUsername });
             await transporter.sendMail({
@@ -131,19 +130,22 @@ module.exports = {
             const isAccountExist = await user.findOne({
                 where: { id: req.user.id },
             });
+
             const email = isAccountExist.email;
-            console.log(email, newEmail);
             if (!isAccountExist.isVerified) throw { msg: "Account not verified" };
             if (currentEmail !== isAccountExist.email)
                 throw { message: "Username not found" };
+
             const result = await user.update(
                 { email: newEmail },
                 { where: { id: req.user.id } }
             );
+
             const data = await fs.readFileSync(
                 "./index.html",
                 "utf-8"
             );
+
             const tempCompile = await handlebars.compile(data);
             const tempResult = tempCompile({ email: newEmail });
             await transporter.sendMail({
@@ -164,18 +166,22 @@ module.exports = {
             const isAccountExist = await user.findOne({
                 where: { id: req.user.id },
             });
+
             const email = isAccountExist.email;
             if (!isAccountExist.isVerified) throw { msg: "Account not verified" };
             if (currentPhone !== isAccountExist.phoneNumber)
                 throw { message: "Phone not found" };
+
             const result = await user.update(
                 { phoneNumber: newPhone },
                 { where: { id: req.user.id } }
             );
+
             const data = await fs.readFileSync(
                 "./index.html",
                 "utf-8"
             );
+
             const tempCompile = await handlebars.compile(data);
             const tempResult = tempCompile({ phoneNumber: newPhone });
             await transporter.sendMail({
@@ -197,20 +203,24 @@ module.exports = {
                 where: { id: req.user.id },
             });
             const email = isAccountExist.email;
+
             if (newPassword !== confirmPassword) throw { message: "Password is not same" }
             const isValid = await bcrypt.compare(currentPassword, isAccountExist.password);
-            console.log(isValid);
+            if (isValid == false) throw { message: "Password not found" };
+
             const salt = await bcrypt.genSalt();
             const hashPassword = await bcrypt.hash(confirmPassword, salt)
-            if (isValid == false) throw { message: "Password not found" };
+
             const result = await user.update(
                 { password: hashPassword },
                 { where: { id: req.user.id } }
             );
+
             const data = await fs.readFileSync(
                 "./index.html",
                 "utf-8"
             );
+
             const tempCompile = await handlebars.compile(data);
             const tempResult = tempCompile({ password: confirmPassword });
             await transporter.sendMail({
@@ -239,20 +249,19 @@ module.exports = {
     },
     forgetPassword: async (req, res) => {
         try {
-            // console.log(req.body);
             const isAccountExist = await user.findOne({
                 where: { email: req.body.email }
             });
-
-            console.log(isAccountExist);
-
             if (!isAccountExist) throw { message: "Email not found" }
+
             const { email } = req.body;
             const payload = { id: isAccountExist.id }
             const token = jwt.sign(payload, "minproBimo", { expiresIn: "3d" });
+
             const data = await fs.readFileSync("./index.html", "utf-8");
             const tempCompile = await handlebars.compile(data);
             const tempResult = tempCompile(data);
+
             await user.update(
                 {
                     isVerified: 1
@@ -267,7 +276,7 @@ module.exports = {
                 subject: "New Phone",
                 html: tempResult,
             });
-            res.status(200).send( token)
+            res.status(200).send(token)
         } catch (error) {
             console.log(error);
             res.status(400).send(error)
@@ -277,16 +286,15 @@ module.exports = {
         try {
             const { newPassword, confirmPassword } = req.body;
             if (newPassword !== confirmPassword) throw { message: "Password is not same" }
+
             const salt = await bcrypt.genSalt(10);
-            const hashPassword = await bcrypt.hash(confirmPassword, salt)
+            const hashPassword = await bcrypt.hash(confirmPassword, salt);
+
             const result = await user.update(
                 { password: hashPassword },
                 { where: { id: req.user.id } }
             );
-            res.status(200).send({
-                status: true,
-                result
-            })
+            res.status(200).send({ message: "Password has been changed" });
         } catch (error) {
             console.log(error);
             res.status(400).send(error);
