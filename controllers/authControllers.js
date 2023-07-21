@@ -57,7 +57,6 @@ module.exports = {
             const token = jwt.sign(payload, "minproBimo", { expiresIn: "3d" });
 
             res.status(200).send({
-                status: true,
                 message: "Login success",
                 token
             });
@@ -87,7 +86,7 @@ module.exports = {
                 }
             );
             res.status(200).send({
-                message: true
+                message: "Verivy Success"
             })
         } catch (error) {
             res.status(400).send(error);
