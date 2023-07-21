@@ -19,12 +19,6 @@ module.exports = {
         const fileFilter = (req, file, cb) => {
             const exFilter = ['jpg', 'jpeg', 'png', 'gif']
             const checkExt = exFilter.includes(file.mimetype.split("/")[1].toLowerCase());
-            // const { imageProfile } = req.user
-            // if (name === "avatar") {
-            //     if (imageProfile !== null) {
-            //         fs.unlinkSync(`${directory}/${imageProfile}`);
-            //     }
-            // }
             if (!checkExt) {
                 cb(new Error("Doesn't support file type"), false);
             } else {

@@ -11,6 +11,8 @@ router.patch("/changeUsername", verifyToken, authControllers.changeUsername);
 router.patch("/changeEmail", verifyToken, authControllers.changeEmail);
 router.patch("/changePhone", verifyToken, authControllers.changePhone);
 router.patch("/changePassword", verifyToken, authControllers.changePassword);
+router.put("/forgetPassword", authControllers.forgetPassword);
+router.patch("/resetPassword", verifyToken, authControllers.resetPassword);
 router.post("/updateProfile", verifyToken, multerUpload(`./Public/Avatar`, 'Avatar').single('file'), authControllers.updateProfile);
 
 module.exports = router;

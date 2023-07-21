@@ -239,9 +239,58 @@ module.exports = {
         }
     },
     forgetPassword: async (req, res) => {
+        try {
+            // console.log(req.body);
+            const isAccountExist = await user.findOne({
+                where: { email: req.body.email }
+            });
 
+            console.log(isAccountExist);
+
+            if (!isAccountExist) throw { message: "Email not found" }
+            const { email } = req.body;
+            const payload = { id: isAccountExist.id }
+            const token = jwt.sign(payload, "minproBimo", { expiresIn: "3d" });
+            const data = await fs.readFileSync("./index.html", "utf-8");
+            const tempCompile = await handlebars.compile(data);
+            const tempResult = tempCompile(data);
+            await user.update(
+                {
+                    isVerified: 1
+                },
+                {
+                    where: { email: req.body.email }
+                }
+            );
+            await transporter.sendMail({
+                from: "aryobimoalvian@gmail.com",
+                to: email,
+                subject: "New Phone",
+                html: tempResult,
+            });
+            res.status(200).send( token)
+        } catch (error) {
+            console.log(error);
+            res.status(400).send(error)
+        }
     },
     resetPassword: async (req, res) => {
-
+        try {
+            const { newPassword, confirmPassword } = req.body;
+            if (newPassword !== confirmPassword) throw { message: "Password is not same" }
+            const salt = await bcrypt.genSalt(10);
+            const hashPassword = await bcrypt.hash(confirmPassword, salt)
+            const result = await user.update(
+                { password: hashPassword },
+                { where: { id: req.user.id } }
+            );
+            res.status(200).send({
+                status: true,
+                result
+            })
+        } catch (error) {
+            console.log(error);
+            res.status(400).send(error);
+        }
     },
 }
