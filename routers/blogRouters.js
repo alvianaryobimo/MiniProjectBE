@@ -6,5 +6,6 @@ const { multerUpload } = require("../middleware/multer");
 router.get("/", blogControllers.getAllBlogs);
 router.post("/createBlog", verifyToken, multerUpload('./Public/Blog', 'Blog').single('file'), blogControllers.createBlog);
 router.get("/:id", blogControllers.getBlogById);
+router.post("/like/:id",verifyToken, blogControllers.likeArticle);
 
 module.exports = router;

@@ -2,8 +2,9 @@ const router = require("express").Router()
 const { authControllers } = require("../controllers");
 const { verifyToken } = require("../middleware/auth");
 const { multerUpload } = require("../middleware/multer");
+const { checkRegsiter } = require("../middleware/validator");
 
-router.post("/", authControllers.register);
+router.post("/", checkRegsiter, authControllers.register);
 router.post("/login", authControllers.login);
 router.get("/keepLogin", verifyToken, authControllers.keepLogin);
 router.patch("/verify", verifyToken, authControllers.verify);
