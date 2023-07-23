@@ -1,8 +1,9 @@
 const db = require("../models");
-// const profile = require("../models/profile");
+const { Op } = require("sequelize");
 const blog = db.Blog;
 const profile = db.Profile;
 const jwt = require("jsonwebtoken");
+const categories = require("../models/categories");
 const likeblogs = db.LikeBlogs
 
 module.exports = {
@@ -95,11 +96,11 @@ module.exports = {
                 blogId,
             });
 
-            // await blog.increment('likeCount', {
-            //     where: {
-            //         id: profileId
-            //     }
-            // });
+            await blog.increment('likesCount', {
+                where: {
+                    id: profileId
+                }
+            });
 
             res.status(200).send({
                 status: 201,
@@ -117,4 +118,43 @@ module.exports = {
             });
         }
     },
+    searchBlog: async (req, res) => {
+        try {
+            const { CategoryId, title, keywords } = req.query
+            const clause = []
+            if (CategoryId) {
+                clause.push({ CategoryId: CategoryId })
+            }
+            if (title) {
+                clause.push({ title: title })
+            }
+            if (keywords) {
+                clause.push({ keywords: keywords })
+            }
+            const result = await blog.findAll(
+                {
+                    where: { [Op.or]: clause }
+                },
+            )
+            res.status(200).send({
+                result
+            })
+        } catch (error) {
+            console.log(error);
+            res.status(400).send(error)
+        }
+    },
+    sortBlog: async (req, res) => {
+        try {
+            const sort = req.query.sort || "DESC";
+            const sortBy = req.query.sortBy || "createdAt";
+            const result = await blog.findAll(
+                {
+                    order: [[sortBy, sort]],
+                });
+            res.status(200).send(result);
+        } catch (error) {
+            res.status(400).send(error)
+        }
+    }
 }
